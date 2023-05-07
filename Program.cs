@@ -1,5 +1,8 @@
+using CIP.API.Identity;
 using CIP.API.Interfaces;
 using CIP.API.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Data.Entity.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddIdentityCore<ApiUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<CIPIdentityDbContext>();
+
+builder.Services.AddDbContext<CIPIdentityDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityDb") ?? string.Empty));
 
 builder.Host.ConfigureLogging(logging =>
 {
@@ -17,7 +25,8 @@ builder.Host.ConfigureLogging(logging =>
 builder.Services
     .AddSingleton<IDapperWrapper, DapperWrapper>()
     .AddSingleton<IDbConnectionFactory, SqlConnectionFactory>()
-    .AddSingleton<ICryptocurrencyRetrieval, CryptocurrencyRetrieval>();
+    .AddSingleton<ICryptocurrencyRetrieval, CryptocurrencyRetrieval>()
+    .AddSingleton<ICustomAuthenticationService, CustomAuthenticationService>();
 
 var app = builder.Build();
 
