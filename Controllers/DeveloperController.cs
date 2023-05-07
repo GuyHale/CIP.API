@@ -1,10 +1,13 @@
-﻿using CIP.API.Identity;
+﻿using CIP.API.Helpers;
+using CIP.API.Identity;
 using CIP.API.Interfaces;
 using CIP.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace CIP.API.Controllers
 {
@@ -16,76 +19,107 @@ namespace CIP.API.Controllers
         private readonly ICryptocurrencyRetrieval _cryptocurrencyRetrieval;
         private readonly ICustomAuthenticationService _customAuthenticationService;
         private readonly ILogger<DeveloperController> _logger;
-        private readonly UserManager<ApiUser> _userManager;
 
-        public DeveloperController(ICryptocurrencyRetrieval cryptocurrencyRetrieval, ICustomAuthenticationService customAuthenticationService, ILogger<DeveloperController> logger, UserManager<ApiUser> userManager)
+        public DeveloperController(ICryptocurrencyRetrieval cryptocurrencyRetrieval, ICustomAuthenticationService customAuthenticationService, ILogger<DeveloperController> logger)
         {
             _cryptocurrencyRetrieval = cryptocurrencyRetrieval;
             _customAuthenticationService = customAuthenticationService;
             _logger = logger;
-            _userManager = userManager;
         }
 
         [Route("{apiKey}/get/all")]
         [HttpGet]
-        public async Task<IEnumerable<Cryptocurrency>> Get(string apiKey)
+        public async Task<ApiResponse> Get(string apiKey)
         {
+            ApiResponse apiResponse = new();
             try
             {
-                if (!await ApiKeyValidation(apiKey))
-                {
-                    return Enumerable.Empty<Cryptocurrency>();
-                }
-                return await _cryptocurrencyRetrieval.Get();
+                return await RequestResponse(apiResponse, apiKey);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
             }
-            return Enumerable.Empty<Cryptocurrency>();
+            return apiResponse.InternalError();
         }
 
         [Route("{apiKey}/get/{name}")]
         [HttpGet]
-        public async Task<Cryptocurrency> Get(string apiKey, string name)
+        public async Task<ApiResponse> Get(string apiKey, string name)
         {
+            ApiResponse apiResponse = new();
             try
             {
-                if (!await ApiKeyValidation(apiKey))
-                {
-                    return Cryptocurrency.Empty();
-                }
-                return await _cryptocurrencyRetrieval.Get(name);
+                return await RequestResponse(apiResponse, apiKey, name);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
             }
-            return Cryptocurrency.Empty();
+            return apiResponse.InternalError();
         }
         
         [Route("{apiKey}/get/{rank}")]
         [HttpGet]
-        public async Task<Cryptocurrency> Get(string apiKey, int rank)
+        public async Task<ApiResponse> Get(string apiKey, int rank)
         {
+            ApiResponse apiResponse = new();
             try
             {
-                if (!await ApiKeyValidation(apiKey))
-                {
-                    return Cryptocurrency.Empty();
-                }
-                return await _cryptocurrencyRetrieval.Get(rank);
+                return await RequestResponse(apiResponse, apiKey, rank);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
             }
-            return Cryptocurrency.Empty();
+            return apiResponse.InternalError();
         }
 
         private async Task<bool> ApiKeyValidation(string apiKey)
         {
             return string.IsNullOrEmpty(await _customAuthenticationService.GetApiKey(apiKey));
+        }
+
+        private async Task<ApiResponse> RequestResponse(ApiResponse apiResponse, string apiKey)
+        {
+            if (!await ApiKeyValidation(apiKey))
+            {
+                return apiResponse.InvalidApiKey();
+            }
+            IEnumerable<Cryptocurrency> cryptocurrencies = await _cryptocurrencyRetrieval.Get();
+            if (!cryptocurrencies.Any())
+            {
+                return apiResponse.InternalError();
+            }
+            return apiResponse.Success(cryptocurrencies);
+        }
+        
+        private async Task<ApiResponse> RequestResponse(ApiResponse apiResponse, string apiKey, string name)
+        {
+            if (!await ApiKeyValidation(apiKey))
+            {
+                return apiResponse.InvalidApiKey();
+            }
+            Cryptocurrency cryptocurrency = await _cryptocurrencyRetrieval.Get(name);
+            if (cryptocurrency is null)
+            {
+                return apiResponse.NotFound(name);
+            }
+            return apiResponse.Success(new List<Cryptocurrency>() { cryptocurrency });
+        }
+        
+        private async Task<ApiResponse> RequestResponse(ApiResponse apiResponse, string apiKey, int rank)
+        {
+            if (!await ApiKeyValidation(apiKey))
+            {
+                return apiResponse.InvalidApiKey();
+            }
+            Cryptocurrency cryptocurrency = await _cryptocurrencyRetrieval.Get(rank);
+            if (cryptocurrency is null)
+            {
+                return apiResponse.InternalError();
+            }
+            return apiResponse.Success(new List<Cryptocurrency>() { cryptocurrency });
         }
     }
 }
