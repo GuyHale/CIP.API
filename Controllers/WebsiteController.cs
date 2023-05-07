@@ -23,9 +23,7 @@ namespace CIP.API.Controllers
         {
             try
             {
-                var res = await _cryptocurrencyRetrieval.Get();
-                _logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(res));
-                return res;
+                return await _cryptocurrencyRetrieval.Get();
             }
             catch(Exception ex) 
             {

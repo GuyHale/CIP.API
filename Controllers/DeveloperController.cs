@@ -20,9 +20,19 @@ namespace CIP.API.Controllers
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Cryptocurrency>> Get(string name)
+        [Route("get")]
+        [HttpGet]
+        public async Task<IEnumerable<Cryptocurrency>> Get()
         {
-
+            try
+            {
+                return await _cryptocurrencyRetrieval.Get();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
+            }
+            return Enumerable.Empty<Cryptocurrency>();
         }
     }
 }
