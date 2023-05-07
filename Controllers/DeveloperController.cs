@@ -20,7 +20,7 @@ namespace CIP.API.Controllers
             _logger = logger;
         }
 
-        [Route("get")]
+        [Route("get/all")]
         [HttpGet]
         public async Task<IEnumerable<Cryptocurrency>> Get()
         {
@@ -33,6 +33,36 @@ namespace CIP.API.Controllers
                 _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
             }
             return Enumerable.Empty<Cryptocurrency>();
+        }
+
+        [Route("get/{name}")]
+        [HttpGet]
+        public async Task<Cryptocurrency> Get(string name)
+        {
+            try
+            {
+                return await _cryptocurrencyRetrieval.Get(name);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
+            }
+            return Cryptocurrency.Empty();
+        }
+        
+        [Route("get/{rank}")]
+        [HttpGet]
+        public async Task<Cryptocurrency> Get(int rank)
+        {
+            try
+            {
+                return await _cryptocurrencyRetrieval.Get(rank);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
+            }
+            return Cryptocurrency.Empty();
         }
     }
 }
