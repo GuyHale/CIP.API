@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace CIP.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/authenticate")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
