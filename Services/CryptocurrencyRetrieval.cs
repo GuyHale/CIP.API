@@ -1,5 +1,6 @@
 ﻿using CIP.API.Interfaces;
 using CIP.API.Models;
+using Dapper;
 using System.Data;
 using System.Data.Entity.Infrastructure;
 
@@ -35,6 +36,40 @@ namespace CIP.API.Services
                 _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
             }
             return Enumerable.Empty<Cryptocurrency>();
+        }
+
+        public async Task<Cryptocurrency> Get(string name)
+        {
+            string connectionString = _configuration.GetConnectionString("CryptoScraperDb") ?? string.Empty;
+            using IDbConnection connection = _dbConnectionFactory.CreateConnection(connectionString);
+            try
+            {
+                DynamicParameters dynamicParameters = new();
+                dynamicParameters.Add("_name", name, DbType.String);
+                return await _dapperWrapper.QuerySinglOrDefaultAsync<Cryptocurrency>(connection, "GetCryptocurrencyByName", dynamicParameters, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
+            }
+            return Cryptocurrency.Empty();
+        }
+        
+        public async Task<Cryptocurrency> Get(int rank)
+        {
+            string connectionString = _configuration.GetConnectionString("CryptoScraperDb") ?? string.Empty;
+            using IDbConnection connection = _dbConnectionFactory.CreateConnection(connectionString);
+            try
+            {
+                DynamicParameters dynamicParameters = new();
+                dynamicParameters.Add("_rank", rank, DbType.Int16);
+                return await _dapperWrapper.QuerySinglOrDefaultAsync<Cryptocurrency>(connection, "GetCryptocurrencyByRank", dynamicParameters, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
+            }
+            return Cryptocurrency.Empty();
         }
     }
 }
