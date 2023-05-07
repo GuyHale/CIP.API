@@ -29,4 +29,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseRouting()
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapGet("/", async context =>
+        {
+            await context.Response.WriteAsync($"{System.Reflection.Assembly.GetExecutingAssembly().GetName()?.Name} running");
+        });
+    });
+
 await app.RunAsync();
