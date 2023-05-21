@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CIP.API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,7 @@ namespace CIP.API.Identity
                  }
             );
 
-            var hasher = new PasswordHasher<ApiUser>();
+            var hasher = new PasswordHasher<CustomUser>();
 
             modelBuilder.Entity<ApiUser>().HasData
             (

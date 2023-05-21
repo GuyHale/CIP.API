@@ -29,9 +29,9 @@ namespace CIP.API.Controllers
 
         [Route("{apiKey}/get/all")]
         [HttpGet]
-        public async Task<ApiResponse> Get(string apiKey)
+        public async Task<ApiResponse<IEnumerable<Cryptocurrency>>> Get(string apiKey)
         {
-            ApiResponse apiResponse = new();
+            ApiResponse<IEnumerable<Cryptocurrency>> apiResponse = new();
             try
             {
                 return await RequestResponse(apiResponse, apiKey);
@@ -45,9 +45,9 @@ namespace CIP.API.Controllers
 
         [Route("{apiKey}/get/{name}")]
         [HttpGet]
-        public async Task<ApiResponse> Get(string apiKey, string name)
+        public async Task<ApiResponse<IEnumerable<Cryptocurrency>>> Get(string apiKey, string name)
         {
-            ApiResponse apiResponse = new();
+            ApiResponse<IEnumerable<Cryptocurrency>> apiResponse = new();
             try
             {
                 return await RequestResponse(apiResponse, apiKey, name);
@@ -61,9 +61,9 @@ namespace CIP.API.Controllers
         
         [Route("{apiKey}/get/{rank}")]
         [HttpGet]
-        public async Task<ApiResponse> Get(string apiKey, int rank)
+        public async Task<ApiResponse<IEnumerable<Cryptocurrency>>> Get(string apiKey, int rank)
         {
-            ApiResponse apiResponse = new();
+            ApiResponse<IEnumerable<Cryptocurrency>> apiResponse = new();
             try
             {
                 return await RequestResponse(apiResponse, apiKey, rank);
@@ -80,7 +80,7 @@ namespace CIP.API.Controllers
             return string.IsNullOrEmpty(await _customAuthenticationService.GetApiKey(apiKey));
         }
 
-        private async Task<ApiResponse> RequestResponse(ApiResponse apiResponse, string apiKey)
+        private async Task<ApiResponse<IEnumerable<Cryptocurrency>>> RequestResponse(ApiResponse<IEnumerable<Cryptocurrency>> apiResponse, string apiKey)
         {
             if (!await ApiKeyValidation(apiKey))
             {
@@ -94,7 +94,7 @@ namespace CIP.API.Controllers
             return apiResponse.Success(cryptocurrencies);
         }
         
-        private async Task<ApiResponse> RequestResponse(ApiResponse apiResponse, string apiKey, string name)
+        private async Task<ApiResponse<IEnumerable<Cryptocurrency>>> RequestResponse(ApiResponse<IEnumerable<Cryptocurrency>> apiResponse, string apiKey, string name)
         {
             if (!await ApiKeyValidation(apiKey))
             {
@@ -108,7 +108,7 @@ namespace CIP.API.Controllers
             return apiResponse.Success(new List<Cryptocurrency>() { cryptocurrency });
         }
         
-        private async Task<ApiResponse> RequestResponse(ApiResponse apiResponse, string apiKey, int rank)
+        private async Task<ApiResponse<IEnumerable<Cryptocurrency>>> RequestResponse(ApiResponse<IEnumerable<Cryptocurrency>> apiResponse, string apiKey, int rank)
         {
             if (!await ApiKeyValidation(apiKey))
             {

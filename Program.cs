@@ -1,5 +1,6 @@
 using CIP.API.Identity;
 using CIP.API.Interfaces;
+using CIP.API.Models;
 using CIP.API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

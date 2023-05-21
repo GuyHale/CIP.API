@@ -1,11 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace CIP.API.Identity
 {
-    public class User
+    public class CustomUser
     {
         [Required]
-        public string Username { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
 
         [Required]
         [MinLength(8)]
@@ -15,10 +17,9 @@ namespace CIP.API.Identity
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
         public string FirstName { get; set; } = string.Empty;
 
-        [Required]
         public string LastName { get; set; } = string.Empty;
+        public string ApiKey { get; set; } = string.Empty;
     }
 }

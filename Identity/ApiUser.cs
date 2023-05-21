@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace CIP.API.Identity
 {
     public class ApiUser : IdentityUser
     {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string ApiKey => Guid.NewGuid().ToString();
+        public string ApiKey { get; set; } = string.Empty;
     }
 }

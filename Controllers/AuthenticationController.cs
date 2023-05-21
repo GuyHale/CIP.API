@@ -1,5 +1,7 @@
 ﻿using CIP.API.Helpers;
 using CIP.API.Identity;
+using CIP.API.Interfaces;
+using CIP.API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,44 +25,40 @@ namespace CIP.API.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register(User user)
+        public async Task<ICustomResponse> Register([FromBody] CustomUser customUser)
         {
             try
             {
-                ApiUser apiUser = TransferUser<User, ApiUser>(user);
-                IdentityResult identityResult = await _userManager.CreateAsync(apiUser, user.Password);
+                ApiUser apiUser = TransferUser<CustomUser, ApiUser>(customUser);
+                IdentityResult identityResult = await _userManager.CreateAsync(apiUser, customUser.Password);
 
-                if (!identityResult.Succeeded)
+                if(!identityResult.Succeeded)
                 {
-                    foreach (IdentityError identityError in identityResult.Errors)
-                    {
-                        ModelState.AddModelError(identityError.Code, identityError.Description);
-                    }
-                    return BadRequest(ModelState);
+                    return FailureResponse(identityResult.Errors);
                 }
                 await _userManager.AddToRoleAsync(apiUser, LookUps.Roles.User.Description());
-                return Accepted();
+                return SuccessResponse();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "MethodName", MethodBase.GetCurrentMethod()?.Name);
             }
-            return Problem(MethodBase.GetCurrentMethod()?.Name, statusCode: 500);
+            return ServerError();
         }
-        
+
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login(LoginUser user)
         {
             try
             {
-                ApiUser apiUser = await _userManager.FindByNameAsync(user.Username);
-                bool passwordValid = await _userManager.CheckPasswordAsync(apiUser, user.Password);
+                ApiUser customUser = await _userManager.FindByNameAsync(user.Username);
+                bool passwordValid = await _userManager.CheckPasswordAsync(customUser, user.Password);
 
-                if (apiUser is null || !passwordValid)
+                if (customUser is null || !passwordValid)
                 {
                     return NotFound();
-                }             
+                }
                 return Accepted();
             }
             catch (Exception ex)
@@ -70,7 +68,7 @@ namespace CIP.API.Controllers
             return Problem(MethodBase.GetCurrentMethod()?.Name, statusCode: 500);
         }
 
-        private TDestination TransferUser<TSource, TDestination>(TSource user) 
+        private TDestination TransferUser<TSource, TDestination>(TSource user)
             where TSource : class
             where TDestination : class, new()
         {
@@ -78,20 +76,45 @@ namespace CIP.API.Controllers
 
             PropertyInfo[] userProperties = user.GetType().GetProperties();
             PropertyInfo[] apiUserProperties = apiUser.GetType().GetProperties();
-            foreach(PropertyInfo userProperty in userProperties)
+            foreach (PropertyInfo userProperty in userProperties)
             {
-                if(!apiUserProperties.Select(x => x.Name).Contains(userProperty.Name))
+                PropertyInfo? apiUserProperty = apiUserProperties.Where(prop => prop.Name == userProperty.Name).FirstOrDefault();
+                if (apiUserProperty is null)
                 {
                     continue;
                 }
                 object? propertyValue = userProperty.GetValue(user);
-                if(propertyValue is null)
+                if (propertyValue is null)
                 {
                     continue;
                 }
-                userProperty.SetValue(apiUser, propertyValue, null);
+                apiUserProperty.SetValue(apiUser, propertyValue, null);
             }
-            return apiUser; 
+            return apiUser;
         }
+
+        private ICustomResponse FailureResponse(IEnumerable<IdentityError> identityErrors)
+        {
+            RegistrationResponse registrationResponse = new();
+            registrationResponse.Success = false;
+            registrationResponse.ErrorMessages = identityErrors.Select(x => x.Description);
+            
+            return registrationResponse;
+        }
+
+        private ICustomResponse SuccessResponse()
+        {
+            return
+            new RegistrationResponse()
+            {
+                Success = true
+            };
+        }
+
+        private ICustomResponse ServerError()
+        {
+            return  new RegistrationResponse() { Success = false, ErrorMessages = new string[] { "Sorry something unexpected has happened, please try again" } } ;
+        }
+
     }
 }
