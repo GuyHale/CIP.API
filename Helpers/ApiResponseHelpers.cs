@@ -1,4 +1,6 @@
-﻿using CIP.API.Models;
+﻿using CIP.API.Interfaces;
+using CIP.API.Models;
+using Microsoft.AspNetCore.Identity;
 using System.Runtime.CompilerServices;
 
 namespace CIP.API.Helpers
@@ -43,6 +45,39 @@ namespace CIP.API.Helpers
             apiResponse.DbResult = new DbResult<IEnumerable<Cryptocurrency>> { Data = data };
             apiResponse.IsValid = true;
             return apiResponse;
+        }
+
+        public static ICustomResponse FailureResponse<T>(IEnumerable<IdentityError> identityErrors) where T : ICustomResponse, new()
+        {
+            T registrationResponse = new()
+            {
+                Success = false,
+                ErrorMessages = identityErrors.Select(x => x.Description)
+            };
+
+            return registrationResponse;
+        }
+
+        public static ICustomResponse SuccessResponse<T>() where T : ICustomResponse, new()
+        {
+            return
+            new T()
+            {
+                Success = true
+            };
+        }
+
+        public static ICustomResponse LoginFailure<T>() where T : ICustomResponse, new()
+        {
+            return new T()
+            {
+                Success = false
+            };
+        }
+
+        public static ICustomResponse ServerError<T>() where T : ICustomResponse, new()
+        {
+            return new T() { Success = false, ErrorMessages = new string[] { "Sorry something unexpected has happened, please try again" } };
         }
     }
 }

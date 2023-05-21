@@ -34,21 +34,21 @@ namespace CIP.API.Controllers
 
                 if(!identityResult.Succeeded)
                 {
-                    return FailureResponse(identityResult.Errors);
+                    return ApiResponseHelpers.FailureResponse<RegistrationResponse>(identityResult.Errors);
                 }
                 await _userManager.AddToRoleAsync(apiUser, LookUps.Roles.User.Description());
-                return SuccessResponse();
+                return ApiResponseHelpers.SuccessResponse<RegistrationResponse>();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "MethodName", MethodBase.GetCurrentMethod()?.Name);
             }
-            return ServerError();
+            return ApiResponseHelpers.ServerError<RegistrationResponse>();
         }
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(LoginUser user)
+        public async Task<ICustomResponse> Login(LoginUser user)
         {
             try
             {
@@ -57,15 +57,15 @@ namespace CIP.API.Controllers
 
                 if (customUser is null || !passwordValid)
                 {
-                    return NotFound();
+                    return ApiResponseHelpers.LoginFailure<LoginResponse>();
                 }
-                return Accepted();
+                return ApiResponseHelpers.SuccessResponse<LoginResponse>();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "MethodName", MethodBase.GetCurrentMethod()?.Name);
             }
-            return Problem(MethodBase.GetCurrentMethod()?.Name, statusCode: 500);
+            return ApiResponseHelpers.ServerError<LoginResponse>();
         }
 
         private TDestination TransferUser<TSource, TDestination>(TSource user)
@@ -93,28 +93,7 @@ namespace CIP.API.Controllers
             return apiUser;
         }
 
-        private ICustomResponse FailureResponse(IEnumerable<IdentityError> identityErrors)
-        {
-            RegistrationResponse registrationResponse = new();
-            registrationResponse.Success = false;
-            registrationResponse.ErrorMessages = identityErrors.Select(x => x.Description);
-            
-            return registrationResponse;
-        }
-
-        private ICustomResponse SuccessResponse()
-        {
-            return
-            new RegistrationResponse()
-            {
-                Success = true
-            };
-        }
-
-        private ICustomResponse ServerError()
-        {
-            return  new RegistrationResponse() { Success = false, ErrorMessages = new string[] { "Sorry something unexpected has happened, please try again" } } ;
-        }
+        
 
     }
 }
