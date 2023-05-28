@@ -27,7 +27,7 @@ builder.Services
     .AddSingleton<IDapperWrapper, DapperWrapper>()
     .AddSingleton<IDbConnectionFactory, SqlConnectionFactory>()
     .AddSingleton<ICryptocurrencyRetrieval, CryptocurrencyRetrieval>()
-    .AddSingleton<ICustomAuthenticationService, CustomAuthenticationService>();
+    .AddScoped<ICustomAuthenticationService, CustomAuthenticationService>();
 
 var app = builder.Build();
 

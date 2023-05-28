@@ -16,28 +16,22 @@ namespace CIP.API.Controllers
     {
         private readonly ILogger<AuthenticationController> _logger;
         private readonly UserManager<ApiUser> _userManager;
+        private readonly ICustomAuthenticationService _customAuthenticationService;
 
-        public AuthenticationController(ILogger<AuthenticationController> logger, UserManager<ApiUser> userManager)
+        public AuthenticationController(ILogger<AuthenticationController> logger, UserManager<ApiUser> userManager, ICustomAuthenticationService customAuthenticationService)
         {
             _logger = logger;
             _userManager = userManager;
+            _customAuthenticationService = customAuthenticationService;
         }
 
         [HttpPost]
         [Route("register")]
-        public async Task<ICustomResponse> Register([FromBody] CustomUser customUser)
+        public async Task<ICustomResponse> Register([FromBody] User customUser)
         {
             try
-            {
-                ApiUser apiUser = TransferUser<CustomUser, ApiUser>(customUser);
-                IdentityResult identityResult = await _userManager.CreateAsync(apiUser, customUser.Password);
-
-                if(!identityResult.Succeeded)
-                {
-                    return ApiResponseHelpers.FailureResponse<RegistrationResponse>(identityResult.Errors);
-                }
-                await _userManager.AddToRoleAsync(apiUser, LookUps.Roles.User.Description());
-                return ApiResponseHelpers.SuccessResponse<RegistrationResponse>();
+            {               
+                return await _customAuthenticationService.Register(customUser);
             }
             catch (Exception ex)
             {
@@ -66,34 +60,6 @@ namespace CIP.API.Controllers
                 _logger.LogError(ex, "MethodName", MethodBase.GetCurrentMethod()?.Name);
             }
             return ApiResponseHelpers.ServerError<LoginResponse>();
-        }
-
-        private TDestination TransferUser<TSource, TDestination>(TSource user)
-            where TSource : class
-            where TDestination : class, new()
-        {
-            TDestination apiUser = new();
-
-            PropertyInfo[] userProperties = user.GetType().GetProperties();
-            PropertyInfo[] apiUserProperties = apiUser.GetType().GetProperties();
-            foreach (PropertyInfo userProperty in userProperties)
-            {
-                PropertyInfo? apiUserProperty = apiUserProperties.Where(prop => prop.Name == userProperty.Name).FirstOrDefault();
-                if (apiUserProperty is null)
-                {
-                    continue;
-                }
-                object? propertyValue = userProperty.GetValue(user);
-                if (propertyValue is null)
-                {
-                    continue;
-                }
-                apiUserProperty.SetValue(apiUser, propertyValue, null);
-            }
-            return apiUser;
-        }
-
-        
-
+        }             
     }
 }

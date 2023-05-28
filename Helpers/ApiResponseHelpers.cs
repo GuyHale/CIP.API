@@ -1,7 +1,7 @@
-﻿using CIP.API.Interfaces;
+﻿using CIP.API.Identity;
+using CIP.API.Interfaces;
 using CIP.API.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Runtime.CompilerServices;
 
 namespace CIP.API.Helpers
 {
@@ -47,6 +47,19 @@ namespace CIP.API.Helpers
             return apiResponse;
         }
 
+        public static RegistrationResponse AddUserToResponse(this RegistrationResponse registrationResponse, User? user)
+        {
+            registrationResponse.User = user;
+            return registrationResponse;
+        }
+
+        public static RegistrationResponse RegistrationSuccess()
+        {
+            return new RegistrationResponse()
+            {
+                Success = true
+            };
+        }
         public static ICustomResponse FailureResponse<T>(IEnumerable<IdentityError> identityErrors) where T : ICustomResponse, new()
         {
             T registrationResponse = new()
@@ -58,10 +71,9 @@ namespace CIP.API.Helpers
             return registrationResponse;
         }
 
-        public static ICustomResponse SuccessResponse<T>() where T : ICustomResponse, new()
+        public static ICustomResponse SuccessResponse<TReturnImplementation>() where TReturnImplementation : ICustomResponse, new()
         {
-            return
-            new T()
+            return new TReturnImplementation()
             {
                 Success = true
             };
