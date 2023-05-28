@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CIP.API.Identity
 {
-    public class CustomUser
+    public class User
     {
         [Required]
         public string UserName { get; set; } = string.Empty;

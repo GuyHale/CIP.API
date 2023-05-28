@@ -40,7 +40,7 @@ namespace CIP.API.Identity
                  }
             );
 
-            var hasher = new PasswordHasher<CustomUser>();
+            var hasher = new PasswordHasher<User>();
 
             modelBuilder.Entity<ApiUser>().HasData
             (
