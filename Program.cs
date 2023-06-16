@@ -1,21 +1,23 @@
-using CIP.API.Identity;
+using Amazon;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2;
+using Amazon.Extensions.NETCore.Setup;
 using CIP.API.Interfaces;
-using CIP.API.Models;
 using CIP.API.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
 using System.Data.Entity.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+AWSOptions aWSOptions = new Amazon.Extensions.NETCore.Setup.AWSOptions()
+{
+    Region = RegionEndpoint.EUWest2,
+    Profile = "guy_hale_legend"
+};
+
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddIdentityCore<ApiUser>()
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<CIPIdentityDbContext>();
-
-builder.Services.AddDbContext<CIPIdentityDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityDb") ?? string.Empty));
 
 builder.Host.ConfigureLogging(logging =>
 {
@@ -27,6 +29,9 @@ builder.Services
     .AddSingleton<IDapperWrapper, DapperWrapper>()
     .AddSingleton<IDbConnectionFactory, SqlConnectionFactory>()
     .AddSingleton<ICryptocurrencyRetrieval, CryptocurrencyRetrieval>()
+    .AddAWSService<IAmazonDynamoDB>()
+    .AddDefaultAWSOptions(aWSOptions)
+    .AddSingleton<IDynamoDBContext, DynamoDBContext>()
     .AddScoped<ICustomAuthenticationService, CustomAuthenticationService>();
 
 var app = builder.Build();

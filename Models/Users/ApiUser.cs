@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace CIP.API.Identity
+namespace CIP.API.Models.Users
 {
     public class ApiUser : IdentityUser
     {

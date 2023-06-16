@@ -1,6 +1,7 @@
-﻿using CIP.API.Identity;
-using CIP.API.Interfaces;
+﻿using CIP.API.Interfaces;
 using CIP.API.Models;
+using CIP.API.Models.Responses;
+using CIP.API.Models.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace CIP.API.Helpers
@@ -47,9 +48,9 @@ namespace CIP.API.Helpers
             return apiResponse;
         }
 
-        public static RegistrationResponse AddUserToResponse(this RegistrationResponse registrationResponse, User? user)
+        public static RegistrationResponse AddUserToResponse(this RegistrationResponse registrationResponse, AuthenticatedUser? authenticatedUser)
         {
-            registrationResponse.User = user;
+            registrationResponse.AuthenticatedUser = authenticatedUser;
             return registrationResponse;
         }
 
