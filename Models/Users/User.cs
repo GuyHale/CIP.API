@@ -3,11 +3,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CIP.API.Models.Users
 {
-    public class AuthenticatedUser
+    [DynamoDBTable("Users")]
+    public class User
     {
         [Required]
         [DynamoDBHashKey("Username")]
         public string UserName { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(8)]
+        [DynamoDBProperty("Password")]
+        public string Password { get; set; } = string.Empty;
 
         [Required]
         [EmailAddress]
@@ -24,7 +30,6 @@ namespace CIP.API.Models.Users
 
         [DynamoDBProperty("Salt")]
         public string Salt { get; set; } = string.Empty;
-
         public string ApiKey { get; set; } = string.Empty;
     }
 }

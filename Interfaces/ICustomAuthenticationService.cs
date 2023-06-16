@@ -7,5 +7,6 @@ namespace CIP.API.Interfaces
     {
         Task<string> GetApiKey(string apiKey);
         Task<ICustomResponse> Register(SignUpUser customUser);
+        Task<ICustomResponse> Login(LoginUser customUser);
     }
 }

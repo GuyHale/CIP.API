@@ -10,54 +10,45 @@ using System.Text.Json;
 
 namespace CIP.API.Controllers
 {
-    [Route("api/authenticate")]
+    [Route("cip/authenticate")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
         private readonly ILogger<AuthenticationController> _logger;
-        private readonly UserManager<ApiUser> _userManager;
         private readonly ICustomAuthenticationService _customAuthenticationService;
 
-        public AuthenticationController(ILogger<AuthenticationController> logger, UserManager<ApiUser> userManager, ICustomAuthenticationService customAuthenticationService)
+        public AuthenticationController(ILogger<AuthenticationController> logger, ICustomAuthenticationService customAuthenticationService)
         {
             _logger = logger;
-            _userManager = userManager;
             _customAuthenticationService = customAuthenticationService;
         }
-
-        [HttpPost]
+        
         [Route("register")]
-        public async Task<ICustomResponse> Register([FromBody] SignUpUser customUser)
+        [HttpPost]
+        public async Task<ICustomResponse> Register([FromBody] SignUpUser signUpUser)
         {
             try
             {               
-                return await _customAuthenticationService.Register(customUser);
+                return await _customAuthenticationService.Register(signUpUser);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "MethodName", MethodBase.GetCurrentMethod()?.Name);
+                _logger.LogError(ex, "{MethodName}", MethodBase.GetCurrentMethod()?.Name);
             }
             return ApiResponseHelpers.ServerError<RegistrationResponse>();
         }
-
-        [HttpPost]
+        
         [Route("login")]
-        public async Task<ICustomResponse> Login(LoginUser user)
+        [HttpPost]
+        public async Task<ICustomResponse> Login(LoginUser loginUser)
         {
             try
             {
-                ApiUser customUser = await _userManager.FindByNameAsync(user.Username);
-                bool passwordValid = await _userManager.CheckPasswordAsync(customUser, user.Password);
-
-                if (customUser is null || !passwordValid)
-                {
-                    return ApiResponseHelpers.LoginFailure<LoginResponse>();
-                }
-                return ApiResponseHelpers.SuccessResponse<LoginResponse>();
+                return await _customAuthenticationService.Login(loginUser);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "MethodName", MethodBase.GetCurrentMethod()?.Name);
+                _logger.LogError(ex, "{MethodName}", MethodBase.GetCurrentMethod()?.Name);
             }
             return ApiResponseHelpers.ServerError<LoginResponse>();
         }             
