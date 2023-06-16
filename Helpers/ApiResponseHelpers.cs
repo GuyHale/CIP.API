@@ -54,7 +54,7 @@ namespace CIP.API.Helpers
             return registrationResponse;
         }
 
-        public static RegistrationResponse RegistrationSuccess()
+        public static RegistrationResponse AuthenticationSuccess()
         {
             return new RegistrationResponse()
             {
@@ -85,6 +85,15 @@ namespace CIP.API.Helpers
             return new T()
             {
                 Success = false
+            };
+        }
+
+        public static ICustomResponse IncorrectCredentials(this ICustomResponse customResponse)
+        {
+            return new LoginResponse()
+            {
+                Success = false,
+                ErrorMessages = new string[] { "Incorrect username or password" }
             };
         }
 

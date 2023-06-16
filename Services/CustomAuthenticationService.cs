@@ -57,9 +57,29 @@ namespace CIP.API.Services
                 await _dynamoDBContext.SaveAsync(signUpUser);
                 AuthenticatedUser authenticatedUser = TransferUser<SignUpUser, AuthenticatedUser>(signUpUser);
                 
-                return ApiResponseHelpers.RegistrationSuccess().AddUserToResponse(authenticatedUser);
+                return ApiResponseHelpers.AuthenticationSuccess().AddUserToResponse(authenticatedUser);
             }
             catch(Exception ex)
+            {
+                _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
+            }
+            return ApiResponseHelpers.ServerError<RegistrationResponse>();
+        }
+
+        public async Task<ICustomResponse> Login(LoginUser loginUser)
+        {
+            try
+            {
+                User? user = await _dynamoDBContext.LoadAsync<User>(loginUser.Username);
+                if(user is null || !user.PasswordVerification(loginUser) )
+                {
+                    return ApiResponseHelpers.LoginFailure<LoginResponse>().IncorrectCredentials();
+                }
+                AuthenticatedUser authenticatedUser = TransferUser<User, AuthenticatedUser>(user);
+
+                return ApiResponseHelpers.AuthenticationSuccess().AddUserToResponse(authenticatedUser);
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
             }
