@@ -23,7 +23,7 @@ namespace CIP.API.Controllers
         {
             try
             {
-                return await _cryptocurrencyRetrieval.Get();
+                return (await _cryptocurrencyRetrieval.Get()).OrderBy(x => x.Rank);
             }
             catch(Exception ex) 
             {

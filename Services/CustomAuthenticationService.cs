@@ -1,7 +1,8 @@
-﻿using CIP.API.Helpers;
-using CIP.API.Identity;
+﻿using Amazon.DynamoDBv2.DataModel;
+using CIP.API.Helpers;
 using CIP.API.Interfaces;
-using CIP.API.Models;
+using CIP.API.Models.Responses;
+using CIP.API.Models.Users;
 using Dapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,19 +18,19 @@ namespace CIP.API.Services
         private readonly IConfiguration _configuration;
         private readonly IDapperWrapper _dapperWrapper;
         private readonly IDbConnectionFactory _dbConnectionFactory;
-        private readonly UserManager<ApiUser> _userManager;
+        private readonly IDynamoDBContext _dynamoDBContext;
 
         public CustomAuthenticationService(ILogger<CustomAuthenticationService> logger,
             IConfiguration configuration,
             IDapperWrapper dapperWrapper,
             IDbConnectionFactory dbConnectionFactory,
-            UserManager<ApiUser> userManager)
+            IDynamoDBContext dynamoDBContext)
         {
             _logger = logger;
             _configuration = configuration;
             _dapperWrapper = dapperWrapper;
             _dbConnectionFactory = dbConnectionFactory;
-            _userManager = userManager;
+            _dynamoDBContext = dynamoDBContext;
         }
         public async Task<string> GetApiKey(string apiKey)
         {
@@ -48,22 +49,15 @@ namespace CIP.API.Services
             return string.Empty;
         }
 
-        public async Task<ICustomResponse> Register(User customUser)
+        public async Task<ICustomResponse> Register(SignUpUser signUpUser)
         {
             try
             {
-                ApiUser apiUser = TransferUser<User, ApiUser>(customUser);
-                IdentityResult identityResult = await _userManager.CreateAsync(apiUser, customUser.Password);
-
-                if (!identityResult.Succeeded)
-                {
-                    return ApiResponseHelpers.FailureResponse<RegistrationResponse>(identityResult.Errors);
-                }
-                await _userManager.AddToRoleAsync(apiUser, LookUps.Roles.User.Description());
-                ApiUser apiUserDb = await _userManager.FindByNameAsync(customUser.UserName);
-                User user = TransferUser<ApiUser, User>(apiUserDb);
+                signUpUser.PasswordHasher();
+                await _dynamoDBContext.SaveAsync(signUpUser);
+                AuthenticatedUser authenticatedUser = TransferUser<SignUpUser, AuthenticatedUser>(signUpUser);
                 
-                return ApiResponseHelpers.RegistrationSuccess().AddUserToResponse(user);
+                return ApiResponseHelpers.RegistrationSuccess().AddUserToResponse(authenticatedUser);
             }
             catch(Exception ex)
             {

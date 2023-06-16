@@ -1,6 +1,6 @@
 ﻿using CIP.API.Interfaces;
 
-namespace CIP.API.Models
+namespace CIP.API.Models.Responses
 {
     public class LoginResponse : ICustomResponse
     {

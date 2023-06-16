@@ -1,7 +1,7 @@
 ﻿using CIP.API.Helpers;
-using CIP.API.Identity;
 using CIP.API.Interfaces;
-using CIP.API.Models;
+using CIP.API.Models.Responses;
+using CIP.API.Models.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +27,7 @@ namespace CIP.API.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<ICustomResponse> Register([FromBody] User customUser)
+        public async Task<ICustomResponse> Register([FromBody] SignUpUser customUser)
         {
             try
             {               

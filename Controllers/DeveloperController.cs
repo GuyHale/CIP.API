@@ -1,13 +1,9 @@
 ﻿using CIP.API.Helpers;
-using CIP.API.Identity;
 using CIP.API.Interfaces;
 using CIP.API.Models;
+using CIP.API.Models.Responses;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
 
 namespace CIP.API.Controllers
 {
@@ -35,22 +31,6 @@ namespace CIP.API.Controllers
             try
             {
                 return await RequestResponse(apiResponse, apiKey);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{MethodName}", System.Reflection.MethodBase.GetCurrentMethod()?.Name);
-            }
-            return apiResponse.InternalError();
-        }
-
-        [Route("{apiKey}/get/{name}")]
-        [HttpGet]
-        public async Task<ApiResponse<IEnumerable<Cryptocurrency>>> Get(string apiKey, string name)
-        {
-            ApiResponse<IEnumerable<Cryptocurrency>> apiResponse = new();
-            try
-            {
-                return await RequestResponse(apiResponse, apiKey, name);
             }
             catch (Exception ex)
             {
@@ -93,21 +73,7 @@ namespace CIP.API.Controllers
             }
             return apiResponse.Success(cryptocurrencies);
         }
-        
-        private async Task<ApiResponse<IEnumerable<Cryptocurrency>>> RequestResponse(ApiResponse<IEnumerable<Cryptocurrency>> apiResponse, string apiKey, string name)
-        {
-            if (!await ApiKeyValidation(apiKey))
-            {
-                return apiResponse.InvalidApiKey();
-            }
-            Cryptocurrency cryptocurrency = await _cryptocurrencyRetrieval.Get(name);
-            if (cryptocurrency is null)
-            {
-                return apiResponse.NotFound(name);
-            }
-            return apiResponse.Success(new List<Cryptocurrency>() { cryptocurrency });
-        }
-        
+               
         private async Task<ApiResponse<IEnumerable<Cryptocurrency>>> RequestResponse(ApiResponse<IEnumerable<Cryptocurrency>> apiResponse, string apiKey, int rank)
         {
             if (!await ApiKeyValidation(apiKey))
