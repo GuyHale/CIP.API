@@ -2,9 +2,6 @@
 using Amazon.DynamoDBv2.DataModel;
 using CIP.API.Interfaces;
 using CIP.API.Models;
-using Dapper;
-using System.Data;
-using System.Data.Entity.Infrastructure;
 
 namespace CIP.API.Services
 {

@@ -32,7 +32,8 @@ builder.Services
     .AddAWSService<IAmazonDynamoDB>()
     .AddDefaultAWSOptions(aWSOptions)
     .AddSingleton<IDynamoDBContext, DynamoDBContext>()
-    .AddScoped<ICustomAuthenticationService, CustomAuthenticationService>();
+    .AddScoped<ICustomAuthenticationService, CustomAuthenticationService>()
+    .AddScoped<ICryptocurrencyApi, CryptocurrencyApiService>();
 
 var app = builder.Build();
 

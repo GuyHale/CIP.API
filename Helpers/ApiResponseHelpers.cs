@@ -1,27 +1,40 @@
 ﻿using CIP.API.Interfaces;
 using CIP.API.Models;
 using CIP.API.Models.Responses;
-using CIP.API.Models.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace CIP.API.Helpers
 {
     public static class ApiResponseHelpers
     {
-        public static ApiResponse<IEnumerable<Cryptocurrency>> InvalidApiKey(this ApiResponse<IEnumerable<Cryptocurrency>> apiResponse)
-        {
-            apiResponse.RequestError = "Invalid API key";
-            apiResponse.RequestStatusCode = 404;
-            apiResponse.DbResult = new DbResult<IEnumerable<Cryptocurrency>>(){ Data = Enumerable.Empty<Cryptocurrency>() };
-            return apiResponse;
+        public static ApiResponse<IEnumerable<Cryptocurrency>> InvalidApiKey()
+        {          
+            return new()
+            { 
+                RequestError = "Invalid API key",
+                RequestStatusCode = 404,
+                DbResult = new DbResult<IEnumerable<Cryptocurrency>>() { Data = Enumerable.Empty<Cryptocurrency>() }
+            };
+        }
+        
+        public static ApiResponse<IEnumerable<Cryptocurrency>> ValidApiKey()
+        {          
+            return new()
+            { 
+                RequestError = string.Empty,
+                RequestStatusCode = 200,
+                DbResult = new DbResult<IEnumerable<Cryptocurrency>>() { Data = Enumerable.Empty<Cryptocurrency>() }
+            };
         }
 
-        public static ApiResponse<IEnumerable<Cryptocurrency>> InternalError(this ApiResponse<IEnumerable<Cryptocurrency>> apiResponse)
-        {
-            apiResponse.RequestError = "Something has gone wrong, please try again in a few minutes";
-            apiResponse.RequestStatusCode = 500;
-            apiResponse.DbResult = new DbResult<IEnumerable<Cryptocurrency>>(){ Data = Enumerable.Empty<Cryptocurrency>() };
-            return apiResponse;
+        public static ApiResponse<IEnumerable<Cryptocurrency>> InternalError()
+        {          
+            return new()
+            {
+                RequestError = "Something has gone wrong, please try again in a few minutes",
+                RequestStatusCode = 500,
+                DbResult = new DbResult<IEnumerable<Cryptocurrency>>() { Data = Enumerable.Empty<Cryptocurrency>() }
+            };
         }
 
         public static ApiResponse<IEnumerable<Cryptocurrency>> NotFound(this ApiResponse<IEnumerable<Cryptocurrency>> apiResponse, string cryptocurrencyName)
@@ -40,27 +53,16 @@ namespace CIP.API.Helpers
             return apiResponse;
         }
 
-        public static ApiResponse<IEnumerable<Cryptocurrency>> Success(this ApiResponse<IEnumerable<Cryptocurrency>> apiResponse, IEnumerable<Cryptocurrency> data)
-        {
-            apiResponse.RequestStatusCode = 200;
-            apiResponse.DbResult = new DbResult<IEnumerable<Cryptocurrency>> { Data = data };
-            apiResponse.IsValid = true;
-            return apiResponse;
-        }
-
-        public static RegistrationResponse AddUserToResponse(this RegistrationResponse registrationResponse, AuthenticatedUser? authenticatedUser)
-        {
-            registrationResponse.AuthenticatedUser = authenticatedUser;
-            return registrationResponse;
-        }
-
-        public static RegistrationResponse AuthenticationSuccess()
-        {
-            return new RegistrationResponse()
+        public static ApiResponse<IEnumerable<Cryptocurrency>> Success(IEnumerable<Cryptocurrency> data)
+        {          
+            return new()
             {
-                Success = true
+                RequestStatusCode = 200,
+                DbResult = new DbResult<IEnumerable<Cryptocurrency>> { Data = data },
+                IsValid = true
             };
         }
+
         public static ICustomResponse FailureResponse<T>(IEnumerable<IdentityError> identityErrors) where T : ICustomResponse, new()
         {
             T registrationResponse = new()
@@ -80,20 +82,11 @@ namespace CIP.API.Helpers
             };
         }
 
-        public static ICustomResponse LoginFailure<T>() where T : ICustomResponse, new()
+        public static ICustomResponse AuthenticationFailure<T>() where T : ICustomResponse, new()
         {
             return new T()
             {
                 Success = false
-            };
-        }
-
-        public static ICustomResponse IncorrectCredentials(this ICustomResponse customResponse)
-        {
-            return new LoginResponse()
-            {
-                Success = false,
-                ErrorMessages = new string[] { "Incorrect username or password" }
             };
         }
 
