@@ -31,7 +31,7 @@ namespace CIP.API.Services
         {
             try
             {
-                ApiKey? apiKey = await _dynamoDBContext.LoadAsync(ApiKey.Create(apiKeyString));
+                ApiKey? apiKey = await _dynamoDBContext.LoadAsync<ApiKey>(apiKeyString);
                 return apiKey is not null;
             }
             catch (Exception ex)
@@ -45,7 +45,8 @@ namespace CIP.API.Services
         {
             try
             {
-                await _dynamoDBContext.SaveAsync(ApiKey.Create(apiKeyString));
+                ApiKey apiKey = new() { Key = apiKeyString };
+                await _dynamoDBContext.SaveAsync(apiKey);
                 return await VerifyApiKey(apiKeyString) ? ApiResponseHelpers.SuccessResponse<ApiKeyCreationResponse>() : ApiResponseHelpers.ServerError<ApiKeyCreationResponse>();
             }
             catch (Exception ex)
