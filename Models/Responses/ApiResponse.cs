@@ -1,6 +1,4 @@
-﻿using System.Security.Policy;
-
-namespace CIP.API.Models.Responses
+﻿namespace CIP.API.Models.Responses
 {
     public class ApiResponse<T>
     {
