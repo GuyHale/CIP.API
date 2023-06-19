@@ -1,8 +1,19 @@
+using Amazon;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2;
+using Amazon.Extensions.NETCore.Setup;
 using CIP.API.Interfaces;
 using CIP.API.Services;
+using Microsoft.AspNetCore.Builder;
 using System.Data.Entity.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+AWSOptions aWSOptions = new Amazon.Extensions.NETCore.Setup.AWSOptions()
+{
+    Region = RegionEndpoint.EUWest2,
+    Profile = "guy_hale_legend"
+};
 
 // Add services to the container.
 
@@ -17,7 +28,12 @@ builder.Host.ConfigureLogging(logging =>
 builder.Services
     .AddSingleton<IDapperWrapper, DapperWrapper>()
     .AddSingleton<IDbConnectionFactory, SqlConnectionFactory>()
-    .AddSingleton<ICryptocurrencyRetrieval, CryptocurrencyRetrieval>();
+    .AddSingleton<ICryptocurrencyRetrieval, CryptocurrencyRetrieval>()
+    .AddAWSService<IAmazonDynamoDB>()
+    .AddDefaultAWSOptions(aWSOptions)
+    .AddSingleton<IDynamoDBContext, DynamoDBContext>()
+    .AddScoped<ICustomAuthenticationService, CustomAuthenticationService>()
+    .AddScoped<ICryptocurrencyApi, CryptocurrencyApiService>();
 
 var app = builder.Build();
 
@@ -28,5 +44,14 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseRouting()
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapGet("/", async context =>
+        {
+            await context.Response.WriteAsync($"{System.Reflection.Assembly.GetExecutingAssembly().GetName()?.Name} running");
+        });
+    });
 
 await app.RunAsync();

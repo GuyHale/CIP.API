@@ -6,12 +6,12 @@ namespace CIP.API.Controllers
 {
     [Route("cip/cryptocurrencies")]
     [ApiController]
-    public class CryptocurrencyController : ControllerBase
+    public class WebsiteController : ControllerBase
     {
         private readonly ICryptocurrencyRetrieval _cryptocurrencyRetrieval;
-        private readonly ILogger<CryptocurrencyController> _logger;
+        private readonly ILogger<WebsiteController> _logger;
 
-        public CryptocurrencyController(ICryptocurrencyRetrieval cryptocurrencyRetrieval, ILogger<CryptocurrencyController> logger)
+        public WebsiteController(ICryptocurrencyRetrieval cryptocurrencyRetrieval, ILogger<WebsiteController> logger)
         {
             _cryptocurrencyRetrieval = cryptocurrencyRetrieval;
             _logger = logger;
@@ -23,9 +23,7 @@ namespace CIP.API.Controllers
         {
             try
             {
-                var res = await _cryptocurrencyRetrieval.Get();
-                _logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(res));
-                return res;
+                return (await _cryptocurrencyRetrieval.Get()).OrderBy(x => x.Rank);
             }
             catch(Exception ex) 
             {
